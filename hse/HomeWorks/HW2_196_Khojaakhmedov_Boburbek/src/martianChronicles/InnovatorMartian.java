@@ -4,15 +4,21 @@ import java.util.ArrayList;
 
 public class InnovatorMartian<T> extends Martian<T> {
     Martian<T> parent;
-    T value;
+    public T value;
     ArrayList<Martian<T>> collOfChild;
     ArrayList<Martian<T>> collOfDes;
 
     public InnovatorMartian(Martian<T> parent, T value, ArrayList<Martian<T>> collOfChild) {
         this.parent = parent;
         this.value = value;
-        this.collOfChild = collOfChild;
-        collOfDes = gainCollOfDes(this);
+        if (collOfChild == null) {
+            this.collOfChild = new ArrayList<>();
+        } else {
+            this.collOfChild = collOfChild;
+        }
+        if (collOfChild != null) {
+            collOfDes = gainCollOfDes(this);
+        }
     }
 
     ArrayList<Martian<T>> gainCollOfDes(Martian<T> curr) {
@@ -25,44 +31,49 @@ public class InnovatorMartian<T> extends Martian<T> {
         return result;
     }
 
-    void setGenCode(T value) throws NullPointerException {
+    public void setGenCode(T value) throws NullPointerException {
         if (value != null) {
             this.value = value;
         } else
             throw new NullPointerException("Parameter T Value in setGEnCode is null!");
     }
 
-    void setParent(Martian<T> newPar) throws Exception {
+    public void setParent(Martian<T> newPar) throws Exception {
         if (!collOfDes.contains(newPar)) {
             this.parent = newPar;
 
             //Бывший родитель
             Martian<T> oldPar = this.parent;
             oldPar.getCollOfChild().remove(this);
-            ((ConservatorMartian<T>) oldPar).collOfDes = ((ConservatorMartian<T>) oldPar).gainCollOfDes(oldPar);
+            ((InnovatorMartian<T>) oldPar).collOfDes = ((InnovatorMartian<T>) oldPar).gainCollOfDes(oldPar);
 
             //Новый родитель
             newPar.getCollOfChild().add(this);
-            ((ConservatorMartian<T>) newPar).collOfDes = ((ConservatorMartian<T>) newPar).gainCollOfDes(oldPar);
+            ((InnovatorMartian<T>) newPar).collOfDes = ((InnovatorMartian<T>) newPar).gainCollOfDes(oldPar);
         } else
             throw new Exception("Setting a new Parent violates the rules of the Martian genealogy!");
     }
 
-    void setCollOfDes(ArrayList<Martian<T>> newColl) throws Exception {
+    public void setCollOfDes(ArrayList<Martian<T>> newColl) throws Exception {
         if (!newColl.contains(this.parent)) {
             this.collOfDes = newColl;
         } else
             throw new Exception("Setting a new Collection of descendant violates the rules of the Martian genealogy!");
     }
 
-    boolean setChild(Martian<T> newChild) {
-        if (((ConservatorMartian<T>) newChild).collOfDes.contains(this))
+    public boolean setChild(Martian<T> newChild) {
+        if (((InnovatorMartian<T>) newChild).collOfDes.contains(this))
             return false;
         else {
             //Родитель нового ребенка
-            Martian<T> par = ((ConservatorMartian<T>) newChild).parent;
-            ((ConservatorMartian<T>) par).collOfChild.remove(newChild);
-            ((ConservatorMartian<T>) par).collOfDes = ((ConservatorMartian<T>) par).gainCollOfDes(par);
+            Martian<T> par = ((InnovatorMartian<T>) newChild).parent;
+            if (par != null) {
+                ArrayList<Martian<T>> collChild = ((InnovatorMartian<T>) par).collOfChild;
+                if (par != null && collChild != null) {
+                    collChild.remove(newChild);
+                    ((InnovatorMartian<T>) par).collOfDes = ((InnovatorMartian<T>) par).gainCollOfDes(par);
+                }
+            }
 
             this.collOfChild.add(newChild);
             this.collOfDes = this.gainCollOfDes(this);
@@ -70,10 +81,10 @@ public class InnovatorMartian<T> extends Martian<T> {
         }
     }
 
-    boolean remChild(Martian<T> oldChild) {
+    public boolean remChild(Martian<T> oldChild) {
         if (this.collOfChild.contains(oldChild)) {
             this.collOfChild.remove(oldChild);
-            ((ConservatorMartian<T>) oldChild).parent = null;
+            ((InnovatorMartian<T>) oldChild).parent = null;
             this.collOfDes = this.gainCollOfDes(this);
             return true;
         } else
@@ -81,11 +92,11 @@ public class InnovatorMartian<T> extends Martian<T> {
     }
 
     @Override
-    boolean hasDescendantWithValue(T value) throws NullPointerException {
+    public boolean hasDescendantWithValue(T value) throws NullPointerException {
         boolean result = false;
         if (value != null) {
             for (Martian<T> mar : collOfDes) {
-                if (((ConservatorMartian<T>) mar).value.equals(value)) {
+                if (((InnovatorMartian<T>) mar).value.equals(value)) {
                     result = true;
                     break;
                 }
@@ -97,11 +108,11 @@ public class InnovatorMartian<T> extends Martian<T> {
     }
 
     @Override
-    boolean hasChildWithValue(T value) throws NullPointerException {
+    public boolean hasChildWithValue(T value) throws NullPointerException {
         boolean result = false;
         if (value != null) {
             for (Martian<T> mar : collOfChild) {
-                if (((ConservatorMartian<T>) mar).value.equals(value)) {
+                if (((InnovatorMartian<T>) mar).value.equals(value)) {
                     result = true;
                     break;
                 }
@@ -112,17 +123,17 @@ public class InnovatorMartian<T> extends Martian<T> {
     }
 
     @Override
-    ArrayList<Martian<T>> getCollOfDes() {
+    public ArrayList<Martian<T>> getCollOfDes() {
         return collOfDes;
     }
 
     @Override
-    ArrayList<Martian<T>> getCollOfChild() {
+    public ArrayList<Martian<T>> getCollOfChild() {
         return this.collOfChild;
     }
 
     @Override
-    Martian<T> getParent() {
+    public Martian<T> getParent() {
         if (this.parent != null)
             return parent;
         else

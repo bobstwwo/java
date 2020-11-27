@@ -3,9 +3,15 @@ package martianChronicles;
 import java.util.ArrayList;
 
 public abstract class Martian<T> {
-   abstract boolean hasDescendantWithValue(T value);
-   abstract boolean hasChildWithValue(T value);
-   abstract ArrayList<Martian<T>> getCollOfDes();
-   abstract ArrayList<Martian<T>> getCollOfChild();
-   abstract Martian<T> getParent();
+    public int shifts;
+
+    public abstract boolean hasDescendantWithValue(T value);
+
+    public abstract boolean hasChildWithValue(T value);
+
+    public abstract ArrayList<Martian<T>> getCollOfDes();
+
+    public abstract ArrayList<Martian<T>> getCollOfChild();
+
+    public abstract Martian<T> getParent();
 }

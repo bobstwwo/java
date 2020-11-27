@@ -3,23 +3,32 @@ package martianChronicles;
 import java.util.ArrayList;
 
 public class ConservatorMartian<T> extends Martian<T> {
-    Martian<T> parent;
-    T value;
-    ArrayList<Martian<T>> collOfChild;
-    ArrayList<Martian<T>> collOfDes;
+    final Martian<T> parent;
+    final T value;
+    final ArrayList<Martian<T>> collOfChild;
+    final ArrayList<Martian<T>> collOfMar = new ArrayList<>();
 
     public ConservatorMartian(Martian<T> parent, T value, ArrayList<Martian<T>> collOfChild) {
         this.parent = parent;
         this.value = value;
         this.collOfChild = collOfChild;
-        collOfDes = gainCollOfDes(this);
+    }
+
+    public ConservatorMartian(InnovatorMartian<T> martian) throws Exception {
+        this.value = martian.value;
+        int size = martian.collOfChild.size();
+        for (int i = 0; i < size; i++) {
+            ((InnovatorMartian<T>) martian.collOfChild.get(i)).setParent(this);
+            collOfMar.add(new ConservatorMartian<T>((InnovatorMartian<T>) martian.collOfChild.get(i)));
+        }
+        this.collOfChild = collOfMar;
+        parent = martian.getParent();
     }
 
     ArrayList<Martian<T>> gainCollOfDes(Martian<T> curr) {
         ArrayList<Martian<T>> result = new ArrayList<>();
         ArrayList<Martian<T>> children = curr.getCollOfChild();
-        for(Martian<T> el:children)
-        {
+        for (Martian<T> el : children) {
             result.addAll(gainCollOfDes(el));
         }
         result.add(curr);
@@ -27,9 +36,10 @@ public class ConservatorMartian<T> extends Martian<T> {
     }
 
     @Override
-    boolean hasDescendantWithValue(T value) {
+    public boolean hasDescendantWithValue(T value) {
         boolean result = false;
         if (value != null) {
+            ArrayList<Martian<T>> collOfDes = this.gainCollOfDes(this);
             for (Martian<T> mar : collOfDes) {
                 if (((ConservatorMartian<T>) mar).value.equals(value)) {
                     result = true;
@@ -43,7 +53,7 @@ public class ConservatorMartian<T> extends Martian<T> {
     }
 
     @Override
-    boolean hasChildWithValue(T value) {
+    public boolean hasChildWithValue(T value) {
         boolean result = false;
         if (value != null) {
             for (Martian<T> mar : collOfChild) {
@@ -58,17 +68,17 @@ public class ConservatorMartian<T> extends Martian<T> {
     }
 
     @Override
-    ArrayList<Martian<T>> getCollOfDes() {
-        return collOfDes;
+    public ArrayList<Martian<T>> getCollOfDes() {
+        return this.gainCollOfDes(this);
     }
 
     @Override
-    ArrayList<Martian<T>> getCollOfChild() {
+    public ArrayList<Martian<T>> getCollOfChild() {
         return this.collOfChild;
     }
 
     @Override
-    Martian<T> getParent() {
+    public Martian<T> getParent() {
         if (this.parent != null)
             return parent;
         else
